@@ -148,14 +148,19 @@ def setSpeed(speed) {
     setAllFans(speed)
 }
 
-def setSetpoint(setPoint) {
-    def childDev = getThermostatDevice()
-    childDev.parse("thermostatSetpoint ${setPoint}")
+def getManualOverrideTime() {
+    return settings.manualOverrideTime
+}
+
+def setManualOverrideTime(manualOverrideTime) {
+    if (settings.manualOverrideTime != manualOverrideTime) {
+        app.updateSetting("manualOverrideTime", manualOverrideTime)
+    }
 }
 
 private controlFans() {
     def childDev = getThermostatDevice()
-    if (childDev.currentManualOverrideActive) {
+    if (childDev.currentManualOverride == "active") {
         return
     }
 
@@ -211,9 +216,6 @@ private setDevice(device, speed) {
 
 def installed() {
     initialize()
-
-    // set the initial setpoint
-    setSetpoint(78)
 }
 
 def updated() {
@@ -237,7 +239,7 @@ private initialize() {
     getMotionState()
 
     subscribe(getThermostatDevice(), "thermostatSetpoint", childEventHandler)
-    subscribe(getThermostatDevice(), "manualOverrideActive", childEventHandler)
+    subscribe(getThermostatDevice(), "manualOverride", childEventHandler)
     subscribe(settings.temperatureSensors, "temperature", temperatureHandler)
     if (settings.fanControllers) {
         subscribe(settings.fanControllers, "speed", fanSpeedHandler)
@@ -345,9 +347,7 @@ private setMotionInactive() {
 }
 
 private setManualOverride() {
-    if (settings.manualOverrideTime) {
-        getThermostatDevice().setManualOverride(settings.manualOverrideTime)
-    }
+    getThermostatDevice().setManualOverride()
 }
 
 private getChildDeviceName() {
@@ -367,6 +367,9 @@ private getThermostatDevice() {
                 name: settings.name
             ]
         )
+    }
+    if (childDev.currentDefaultManualOverrideTime != settings.manualOverrideTime) {
+        childDev.parse("defaultManualOverrideTime ${settings.manualOverrideTime}")
     }
     return childDev
 }

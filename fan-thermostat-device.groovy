@@ -15,8 +15,23 @@ metadata {
         command "setManualOverride", ["number"]
         command "clearManualOverride"
 
-        attribute "manualOverrideActive", "number"
-        attribute "thermostatMode", "enum", ["cool"]
+        attribute "manualOverride", "enum", ["active", "inactive"]
+        attribute "defaultManualOverrideTime", "number"
+    }
+}
+
+def installed() {
+    initialize()
+}
+
+def updated() {
+    initialize()
+}
+
+def initialize() {
+    setThermostatMode("cool")
+    if (currentThermostatSetpoint == null) {
+        setCoolingSetpoint(78)
     }
 }
 
@@ -54,12 +69,17 @@ def setCoolingSetpoint(temperature) {
 
 def clearManualOverride() {
     unschedule("clearManualOverride")
-    sendEvent(name: "manualOverrideActive", value: 0)
+    sendEvent(name: "manualOverride", value: "inactive")
 }
 
-def setManualOverride(overrideSeconds) {
-    sendEvent(name: "manualOverrideActive", value: 1)
-    runIn(overrideSeconds, "clearManualOverride")
+def setManualOverride(overrideSeconds=null) {
+    if (overrideSeconds == null) {
+        overrideSeconds = settings.defaultManualOverrideTime
+    }
+    if (overrideSeconds) {
+        sendEvent(name: "manualOverride", value: "active")
+        runIn(overrideSeconds, "clearManualOverride")
+    }
 }
 
 def setThermostatMode(mode) {
