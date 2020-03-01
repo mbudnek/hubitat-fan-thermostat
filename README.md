@@ -33,3 +33,16 @@ Each Fan Thermostat instance has the following configuration parameters:
     * Motion Timout: The amount of time, in seconds, that fans will remain on after all selected motion sensors become inactive.
 * Retrigger Time: The amount of time, in seconds, before the thremostat will turn the fan back on after turning it off.
 * Manual Override Time: The amount of time, in seconds, before the thermostat will resume controlling the fan after it is controlled manually (by using a wall switch or voice control, for example).
+
+## Usage
+
+Each Fan Thermostat instance will create a virtual Fan Thermostat device.  That device acts as both a fan controller and a thermostat.  They provide the following commands:
+
+* On - Turn the linked fans on
+* Off - Turn the linked fans off
+* Set Speed - Set the linked fans to the specified speed.  Linked On/Off switches will be turned on for any speed other than "off".
+* Set Cooling Setpoint - Set the temperature at which the linked fans will be turned on automatically
+* Set Manual Override - Disable thermostat control of the linked fans for the specified time, in seconds
+* Clear Manual Override - Resume thermostat control of the linked fans if a manual override was active
+
+The "Auto", "Heat", "Cool", "Emergency Heat", and "Set Thermostat Mode" commands are provided to fulfil the requirements for the "ThermostatMode" capability, but the only supported mode is "cool".
