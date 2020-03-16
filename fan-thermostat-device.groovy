@@ -42,8 +42,12 @@ def parse(command) {
 
     if (attr == "speed") {
         if (value == "off") {
+            state.lastSpeed = device.currentSpeed
             sendEvent(name: "switch", value: "off")
         } else {
+            if (value == "on" && state.lastSpeed) {
+                value = state.lastSpeed
+            }
             sendEvent(name: "switch", value: "on")
         }
     }
