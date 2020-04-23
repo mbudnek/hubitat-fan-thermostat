@@ -41,8 +41,10 @@ Each Fan Thermostat instance will create a virtual Fan Thermostat device.  That 
 * On - Turn the linked fans on
 * Off - Turn the linked fans off
 * Set Speed - Set the linked fans to the specified speed.  Linked On/Off switches will be turned on for any speed other than "off".
+* Set Level - Set the linked fans' speed based on level. The range is split into a number of equal-sized ranges that each set the fan to a given speed.  For example, for a 3-speed fan, level 1-33 will set the fan to low, 34-66 to medium and 67-99 high.
 * Set Cooling Setpoint - Set the temperature at which the linked fans will be turned on automatically
 * Set Manual Override - Disable thermostat control of the linked fans for the specified time, in seconds
 * Clear Manual Override - Resume thermostat control of the linked fans if a manual override was active
+* Set Thermostat Mode - Set the mode of the thermostat.  Only the "off" and "cool" modes are supported.
 
-The "Auto", "Heat", "Cool", "Emergency Heat", and "Set Thermostat Mode" commands are provided to fulfil the requirements for the "ThermostatMode" capability, but the only supported mode is "cool".
+The "Auto", "Heat", and "Emergency Heat" commands are provided to fulfil the requirements for the "ThermostatMode" capability, but the only supported modes are "off" and "cool".
