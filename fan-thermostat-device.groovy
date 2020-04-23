@@ -1,3 +1,24 @@
+// Copyright 2020 Miles Budnek
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+// Changelog:
+// * Feb 17 2020 - Initial Release
+// * Mar 01 2020 - Make manualOverride command paramter optional
+// * Mar 15 2020 - Fix an issue where the device would repor its speed as "on" sometimes
+// * Apr 23 2020 - Add support for the "off" thermostat mode and the
+//                 SwitchLevel capability
+
 metadata {
     definition(
         name: "Fan Thermostat",
@@ -6,7 +27,9 @@ metadata {
     ) {
         capability "Actuator"
         capability "Switch"
+        capability "SwitchLevel"
         capability "FanControl"
+        capability "Initialize"
         capability "ThermostatCoolingSetpoint"
         capability "ThermostatSetpoint"
         capability "TemperatureMeasurement"
@@ -29,7 +52,10 @@ def updated() {
 }
 
 def initialize() {
-    setThermostatMode("cool")
+    sendEvent(name: "supportedThermostatModes", value: ["off", "cool"])
+    if (currentThermostatMode == null) {
+        setThermostatMode("cool")
+    }
     if (currentThermostatSetpoint == null) {
         setCoolingSetpoint(78)
     }
@@ -66,6 +92,15 @@ def setSpeed(speed) {
     parent.setSpeed(speed)
 }
 
+def setLevel(level) {
+    if (level < 0) {
+        level = 0;
+    } else if (level > 99) {
+        level = 99
+    }
+    parent.setLevel(level)
+}
+
 def setCoolingSetpoint(temperature) {
     sendEvent(name: "thermostatSetpoint", value: temperature)
     sendEvent(name: "coolingSetpoint", value: temperature)
@@ -87,7 +122,10 @@ def setManualOverride(overrideSeconds=null) {
 }
 
 def setThermostatMode(mode) {
-    sendEvent(name: "thermostatMode", value: "cool")
+    sendEvent(
+        name: "thermostatMode",
+        value: mode == "off" ? "off" : "cool"
+    )
 }
 
 def cool() {
@@ -97,13 +135,13 @@ def cool() {
 // These are just here to fulfill the contract for the ThermostatMode capability
 // These modes aren't actually supported, nor do them make sense for this device
 def auto() {
-    setThermostatMode("auto")
+    setThermostatMode("cool")
 }
 
 def heat() {
-    setThermostatMode("heat")
+    setThermostatMode("cool")
 }
 
 def emergencyHeat() {
-    setThermostatMode("emergency heat")
+    setThermostatMode("cool")
 }

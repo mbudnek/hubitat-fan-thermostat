@@ -12,6 +12,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// Changelog:
+// * Feb 17 2020 - Initial Release
+// * Mar 01 2020 - Make manualOverride device command paramter optional
+// * Apr 23 2020 - Add support for the "off" thermostat mode and the
+//                 SwitchLevel capability
+
 import groovy.transform.Field
 
 definition(
@@ -136,16 +142,58 @@ def mainPreferences() {
 }
 
 def on() {
-    setSpeed("on")
+    setManualOverride()
+    setAllFans("on")
 }
 
 def off() {
-    setSpeed("off")
+    setManualOverride()
+    setAllFans("off")
+}
+
+private levelToSpeed(level) {
+    if (level == 0) {
+        return "off"
+    }
+
+    def fanSpeeds = settings.fanSpeeds.reverse() ?: ["on"]
+    def interval = Math.round(100 / settings.fanSpeeds.size())
+    for (def i = 0; i < fanSpeeds.size(); ++i) {
+        if (level > i * interval && level <= (i + 1) * interval) {
+            return fanSpeeds[i]
+        }
+    }
+}
+
+private speedToLevel(speed) {
+    if (speed == "off") {
+        return 0
+    }
+
+    def speeds = settings.fanSpeeds.reverse() ?: ["on"]
+    def speedIndex = speeds.indexOf(speed)
+    def levelInterval = Math.round(100 / speeds.size())
+    return (levelInterval * speedIndex) + 1
+}
+
+def setLevel(level) {
+    if (level == 0) {
+        off()
+    } else {
+        setManualOverride()
+        setAllFans(levelToSpeed(level), level)
+    }
 }
 
 def setSpeed(speed) {
-    setManualOverride()
-    setAllFans(speed)
+    if (speed == "on") {
+        on()
+    } else if (speed == "off") {
+        off()
+    } else {
+        setManualOverride()
+        setAllFans(speed, speedToLevel(speed))
+    }
 }
 
 def getManualOverrideTime() {
@@ -165,7 +213,12 @@ private controlFans() {
     }
 
     def setPoint = childDev.currentThermostatSetpoint
-    if (childDev.currentTemperature < setPoint || !state.motionActive) {
+    if (childDev.currentThermostatMode == "off") {
+        state.lastOffTime = null
+        if (childDev.currentSpeed != "off") {
+            setAllFans("off")
+        }
+    } else if (childDev.currentTemperature < setPoint || !state.motionActive) {
         if (childDev.currentSpeed != "off") {
             state.lastOffTime = new Date().getTime()
             setAllFans("off")
@@ -185,7 +238,7 @@ private controlFans() {
             for (i = 0; i < fanSpeeds.size(); ++i) {
                 def temp = setPoint + (fanSpeeds.size() - 1 - i) * settings.temperatureStep
                 if (childDev.currentTemperature > temp) {
-                    setAllFans(fanSpeeds[i])
+                    setAllFans(fanSpeeds[i], speedToLevel(fanSpeeds[i]))
                     break
                 }
             }
@@ -193,8 +246,12 @@ private controlFans() {
     }
 }
 
-private setAllFans(speed) {
-    getThermostatDevice().parse("speed ${speed}")
+private setAllFans(speed, level=null) {
+    def childDev = getThermostatDevice()
+    childDev.parse("speed ${speed}")
+    if (level != null) {
+        childDev.parse("level ${level}")
+    }
     settings.fanControllers?.each { fanController ->
         setDevice(fanController, speed)
     }
@@ -239,6 +296,7 @@ private initialize() {
     getMotionState()
 
     subscribe(getThermostatDevice(), "thermostatSetpoint", childEventHandler)
+    subscribe(getThermostatDevice(), "thermostatMode", childEventHandler)
     subscribe(getThermostatDevice(), "manualOverride", childEventHandler)
     subscribe(settings.temperatureSensors, "temperature", temperatureHandler)
     if (settings.fanControllers) {
