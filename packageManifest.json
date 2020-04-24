@@ -1,0 +1,34 @@
+{
+  "packageName": "Fan Thermostat",
+  "author": "Miles Budnek",
+  "version": "1.1",
+  "minimumHEVersion": "0.0",
+  "dateReleased": "2020-02-17",
+  "apps": [
+    {
+      "id": "ab83b7e6-c892-4a8f-9eb3-0b9c66023c2a",
+      "name": "Fan Thermostat",
+      "namespace": "mbudnek",
+      "location": "https://raw.githubusercontent.com/mbudnek/hubitat-fan-thermostat/master/fan-thermostat-parent.groovy",
+      "required": true,
+      "oauth": false
+    },
+    {
+      "id": "638bad7e-1c79-4d8d-84fd-8e6a66ad71b0",
+      "name": "Fan Thermostat Child",
+      "namespace": "mbudnek",
+      "location": "https://raw.githubusercontent.com/mbudnek/hubitat-fan-thermostat/master/fan-thermostat-child.groovy",
+      "required": true,
+      "oauth": false
+    }
+  ],
+  "drivers": [
+    {
+      "id": "94604635-eaa5-430f-8325-16be8066cae2",
+      "name": "Fan Thermostat",
+      "namespace": "mbudnek",
+      "location": "https://raw.githubusercontent.com/mbudnek/hubitat-fan-thermostat/master/fan-thermostat-device.groovy",
+      "required": true
+    }
+  ]
+}
