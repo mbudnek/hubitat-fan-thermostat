@@ -208,17 +208,12 @@ def setManualOverrideTime(manualOverrideTime) {
 
 private controlFans() {
     def childDev = getThermostatDevice()
-    if (childDev.currentManualOverride == "active") {
+    if (childDev.currentManualOverride == "active" || childDev.currentThermostatMode == "off") {
         return
     }
 
     def setPoint = childDev.currentThermostatSetpoint
-    if (childDev.currentThermostatMode == "off") {
-        state.lastOffTime = null
-        if (childDev.currentSpeed != "off") {
-            setAllFans("off")
-        }
-    } else if (childDev.currentTemperature < setPoint || !state.motionActive) {
+    if (childDev.currentTemperature < setPoint || !state.motionActive) {
         if (childDev.currentSpeed != "off") {
             state.lastOffTime = new Date().getTime()
             setAllFans("off")

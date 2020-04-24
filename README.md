@@ -45,6 +45,6 @@ Each Fan Thermostat instance will create a virtual Fan Thermostat device.  That 
 * Set Cooling Setpoint - Set the temperature at which the linked fans will be turned on automatically
 * Set Manual Override - Disable thermostat control of the linked fans for the specified time, in seconds
 * Clear Manual Override - Resume thermostat control of the linked fans if a manual override was active
-* Set Thermostat Mode - Set the mode of the thermostat.  Only the "off" and "cool" modes are supported.
+* Set Thermostat Mode - Set the mode of the thermostat.  Only the "off" and "cool" modes are supported.  When the mode is set to "off", the thermostat will not control of linked fans; control will be fully manual.
 
 The "Auto", "Heat", and "Emergency Heat" commands are provided to fulfil the requirements for the "ThermostatMode" capability, but the only supported modes are "off" and "cool".
