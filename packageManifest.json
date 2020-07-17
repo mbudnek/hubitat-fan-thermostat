@@ -1,8 +1,11 @@
 {
   "packageName": "Fan Thermostat",
   "author": "Miles Budnek",
-  "version": "1.1",
+  "version": "1.2",
   "minimumHEVersion": "0.0",
+  "documentationLink": "https://github.com/mbudnek/hubitat-fan-thermostat/blob/master/README.md",
+  "communityLink": "https://community.hubitat.com/t/release-fan-thermostat-with-manual-override/34554",
+  "releaseNotes": "Changelog:\n  * 1.1 - Initial Release\n  * 1.2 - Fix thermostat mode and setpoint reverting to default on hub reboot",
   "dateReleased": "2020-02-17",
   "apps": [
     {
