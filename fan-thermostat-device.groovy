@@ -18,6 +18,7 @@
 // * Mar 15 2020 - Fix an issue where the device would repor its speed as "on" sometimes
 // * Apr 23 2020 - Add support for the "off" thermostat mode and the
 //                 SwitchLevel capability
+// * Jul 17 2020 - Fix thermostat mode and setpoint reverting to default on hub reboot
 
 metadata {
     definition(
@@ -53,10 +54,10 @@ def updated() {
 
 def initialize() {
     sendEvent(name: "supportedThermostatModes", value: ["off", "cool"])
-    if (currentThermostatMode == null) {
+    if (device.currentThermostatMode == null) {
         setThermostatMode("cool")
     }
-    if (currentThermostatSetpoint == null) {
+    if (device.currentThermostatSetpoint == null) {
         setCoolingSetpoint(78)
     }
 }
