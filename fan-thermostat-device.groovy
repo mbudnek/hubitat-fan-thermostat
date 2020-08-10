@@ -19,6 +19,7 @@
 // * Apr 23 2020 - Add support for the "off" thermostat mode and the
 //                 SwitchLevel capability
 // * Jul 17 2020 - Fix thermostat mode and setpoint reverting to default on hub reboot
+// * Aug 10 2020 - Fix issue with manual override not working
 
 metadata {
     definition(
@@ -114,11 +115,11 @@ def clearManualOverride() {
 
 def setManualOverride(overrideSeconds=null) {
     if (overrideSeconds == null) {
-        overrideSeconds = settings.defaultManualOverrideTime
+        overrideSeconds = device.currentDefaultManualOverrideTime
     }
     if (overrideSeconds) {
         sendEvent(name: "manualOverride", value: "active")
-        runIn(overrideSeconds, "clearManualOverride")
+        runIn(overrideSeconds.toLong(), "clearManualOverride")
     }
 }
 
