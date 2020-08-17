@@ -17,6 +17,7 @@
 // * Mar 01 2020 - Make manualOverride device command paramter optional
 // * Apr 23 2020 - Add support for the "off" thermostat mode and the
 //                 SwitchLevel capability
+// * Aug 17 2020 - Fix broken child device initialization
 
 import groovy.transform.Field
 
@@ -357,7 +358,7 @@ private getFanSpeed() {
 
     def newFanSpeed = childDev.currentSpeed
     if (settings.fanControllers) {
-        fanSpeeds += settings.fanControllers.each { fanController ->
+        settings.fanControllers.each { fanController ->
             if (fanController.currentSpeed != childDev.currentSpeed) {
                 setManualOverride()
                 newFanSpeed = fanController.currentSpeed
@@ -365,7 +366,7 @@ private getFanSpeed() {
         }
     }
     if (settings.switches) {
-        fanSpeeds += settings.switches.collect { sw ->
+        settings.switches.each { sw ->
             if (sw.currentSwitch == "off" && childDev.currentSpeed != "off") {
                 setManualOverride()
                 newFanSpeed = "off"
