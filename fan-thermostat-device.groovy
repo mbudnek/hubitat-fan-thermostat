@@ -20,6 +20,7 @@
 //                 SwitchLevel capability
 // * Jul 17 2020 - Fix thermostat mode and setpoint reverting to default on hub reboot
 // * Aug 10 2020 - Fix issue with manual override not working
+// * Aug 17 2020 - Fix issue when controlling switches
 
 metadata {
     definition(
@@ -73,7 +74,7 @@ def parse(command) {
             state.lastSpeed = device.currentSpeed
             sendEvent(name: "switch", value: "off")
         } else {
-            if (value == "on" && state.lastSpeed) {
+            if (value == "on" && state.lastSpeed && state.lastSpeed != "off") {
                 value = state.lastSpeed
             }
             sendEvent(name: "switch", value: "on")
