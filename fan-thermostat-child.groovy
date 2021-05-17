@@ -18,7 +18,8 @@
 // * Apr 23 2020 - Add support for the "off" thermostat mode and the
 //                 SwitchLevel capability
 // * Aug 17 2020 - Fix broken child device initialization
-// * May 17 2021 - Fix errors when using switch with no fan controller (i.e. for using with box fan on a switched outlet)
+// * May 17 2021 - Fix errors when using switch with no fan controller
+//                 (i.e. for using with box fan on a switched outlet)
 
 import groovy.transform.Field
 
@@ -158,8 +159,8 @@ private levelToSpeed(level) {
         return "off"
     }
 
-    def fanSpeeds = settings.fanSpeeds.reverse() ?: ["on"]
-    def interval = Math.round(100 / settings.fanSpeeds.size())
+    def fanSpeeds = settings.fanSpeeds?.reverse() ?: ["on"]
+    def interval = Math.round(100 / fanSpeeds.size())
     for (def i = 0; i < fanSpeeds.size(); ++i) {
         if (level > i * interval && level <= (i + 1) * interval) {
             return fanSpeeds[i]
@@ -172,10 +173,7 @@ private speedToLevel(speed) {
         return 0
     }
 
-    def speeds = ["on"]
-    if (settings.fanSpeeds) {
-     speeds = settings.fanSpeeds.reverse() ?: ["on"]
-    }
+    def speeds = settings.fanSpeeds?.reverse() ?: ["on"]
     def speedIndex = speeds.indexOf(speed)
     def levelInterval = Math.round(100 / speeds.size())
     return (levelInterval * speedIndex) + 1
@@ -231,12 +229,8 @@ private controlFans() {
         }
         def retriggerTime = settings.retriggerTime * 1000
         if (now - lastOffTime > retriggerTime) {
-            def fanSpeeds = ["on"]
-            def tempStep = 3
-            if (settings.fanSpeeds) {
-                fanSpeeds = settings.fanSpeeds
-                tempStep = settings.temperatureStep
-            }
+            def fanSpeeds = settings.fanSpeeds ?: ["on"]
+            def tempStep = settings.temperatureStep ?: 3
             for (i = 0; i < fanSpeeds.size(); ++i) {
                 def temp = setPoint + (fanSpeeds.size() - 1 - i) * tempStep
                 if (childDev.currentTemperature > temp) {
