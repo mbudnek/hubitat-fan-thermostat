@@ -20,6 +20,8 @@
 // * Aug 17 2020 - Fix broken child device initialization
 // * May 17 2021 - Fix errors when using switch with no fan controller
 //                 (i.e. for using with box fan on a switched outlet)
+// * Jun 18 2021 - Retrigger fans immediately when the retrigger time elapses
+//                 rather than waiting for the next sensor event
 
 import groovy.transform.Field
 
