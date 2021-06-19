@@ -324,7 +324,7 @@ def retriggerTimeoutCheck() {
 
 def fanSpeedHandler(evt) {
     if (evt.value == "off") {
-        runIn(settings.retiggerTime, "retriggerTimeoutCheck")
+        runIn(settings.retriggerTime, "retriggerTimeoutCheck")
     }
     def childDev = getThermostatDevice()
     if (evt.value != childDev.currentSpeed) {
@@ -335,7 +335,7 @@ def fanSpeedHandler(evt) {
 
 def switchHandler(evt) {
     if (evt.value == "off") {
-        runIn(settings.retiggerTime, "retriggerTimeoutCheck")
+        runIn(settings.retriggerTime, "retriggerTimeoutCheck")
     }
     def childDev = getThermostatDevice()
     def childOn = childDev.currentSpeed != "off"
