@@ -316,7 +316,14 @@ def motionHandler(evt) {
     controlFans()
 }
 
+def retriggerTimeoutCheck() {
+    controlFans()
+}
+
 def fanSpeedHandler(evt) {
+    if (evt.value == "off") {
+        runIn(settings.retiggerTime, "retriggerTimeoutCheck")
+    }
     def childDev = getThermostatDevice()
     if (evt.value != childDev.currentSpeed) {
         setManualOverride()
@@ -325,6 +332,9 @@ def fanSpeedHandler(evt) {
 }
 
 def switchHandler(evt) {
+    if (evt.value == "off") {
+        runIn(settings.retiggerTime, "retriggerTimeoutCheck")
+    }
     def childDev = getThermostatDevice()
     def childOn = childDev.currentSpeed != "off"
     if (evt.value == "off" && childOn) {
