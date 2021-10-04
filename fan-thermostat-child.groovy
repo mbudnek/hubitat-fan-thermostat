@@ -22,6 +22,7 @@
 //                 (i.e. for using with box fan on a switched outlet)
 // * Jun 18 2021 - Retrigger fans immediately when the retrigger time elapses
 //                 rather than waiting for the next sensor event
+// * Oct 04 2021 - Stop motion timeout when fan turns off
 
 import groovy.transform.Field
 
@@ -399,7 +400,7 @@ private getMotionState() {
         motion = settings.motionSensors.any { sensor -> sensor.currentMotion == "active" }
     }
 
-    if (motion || settings.motionTimeout == 0) {
+    if (motion || settings.motionTimeout == 0 || getThermostatDevice().currentSpeed == "off") {
         unschedule("setMotionInactive")
         state.motionActive = motion
     } else if (oldMotionState) {
