@@ -21,6 +21,7 @@
 // * Jul 17 2020 - Fix thermostat mode and setpoint reverting to default on hub reboot
 // * Aug 10 2020 - Fix issue with manual override not working
 // * Aug 17 2020 - Fix issue when controlling switches
+// * May 04 2022 - Add support for the ThermostatOperatingState capability
 
 metadata {
     definition(
@@ -37,12 +38,14 @@ metadata {
         capability "ThermostatSetpoint"
         capability "TemperatureMeasurement"
         capability "ThermostatMode"
+        capability "ThermostatOperatingState"
 
         command "setManualOverride", ["number"]
         command "clearManualOverride"
 
         attribute "manualOverride", "enum", ["active", "inactive"]
         attribute "defaultManualOverrideTime", "number"
+        attribute "thermostatOperatingState", "enum", ["cooling", "idle"]
     }
 }
 
@@ -73,11 +76,13 @@ def parse(command) {
         if (value == "off") {
             state.lastSpeed = device.currentSpeed
             sendEvent(name: "switch", value: "off")
+            sendEvent(name: "thermostatOperatingState", value: "idle")
         } else {
             if (value == "on" && state.lastSpeed && state.lastSpeed != "off") {
                 value = state.lastSpeed
             }
             sendEvent(name: "switch", value: "on")
+            sendEvent(name: "thermostatOperatingState", value: "cooling")
         }
     }
     sendEvent(name: attr, value: value)
