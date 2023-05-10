@@ -23,6 +23,9 @@
 // * Jun 18 2021 - Retrigger fans immediately when the retrigger time elapses
 //                 rather than waiting for the next sensor event
 // * Oct 04 2021 - Stop motion timeout when fan turns off
+// * May 10 2023 - Add option to use freeform fan speeds for devices that
+//                 support non-standard speed settings (i.e. a 6-speed fan
+//                 controller)
 
 import groovy.transform.Field
 
@@ -85,14 +88,31 @@ def mainPreferences() {
             )
             if (settings.fanControllers) {
                 input(
-                    name: "fanSpeeds",
-                    title: "Participating Speeds",
-                    descriptions: "Speed settings that this thermostat will set the fan to",
-                    type: "enum",
-                    options: FAN_LEVELS,
-                    required: true,
-                    multiple: true
+                    name: "freeFormFanSpeeds",
+                    title: "Use Non-Standard Fan Speeds",
+                    type: "bool",
+                    default: false,
+                    submitOnChange: true
                 )
+                if (settings.freeFormFanSpeeds) {
+                    input(
+                        name: "fanSpeeds",
+                        title: "Participating Speeds",
+                        description: "Speed settings that this thermostat will set the fan to from highest to lowest.  Separate speeds with a comma",
+                        type: "text",
+                        required: true
+                    )
+                } else {
+                    input(
+                        name: "fanSpeeds",
+                        title: "Participating Speeds",
+                        description: "Speed settings that this thermostat will set the fan to",
+                        type: "enum",
+                        options: FAN_LEVELS,
+                        required: true,
+                        multiple: true
+                    )
+                }
                 input(
                     name: "temperatureStep",
                     title: "Temperature Step",
@@ -157,12 +177,24 @@ def off() {
     setAllFans("off")
 }
 
+private getFanSpeeds() {
+    if (settings.fanSpeeds) {
+        if (settings.freeFormFanSpeeds) {
+            return settings.fanSpeeds.split("\\s*,\\s*").toList()
+        } else {
+            return settings.fanSpeeds
+        }
+    } else {
+        return ["on"]
+    }
+}
+
 private levelToSpeed(level) {
     if (level == 0) {
         return "off"
     }
 
-    def fanSpeeds = settings.fanSpeeds?.reverse() ?: ["on"]
+    def fanSpeeds = getFanSpeeds().reverse()
     def interval = Math.round(100 / fanSpeeds.size())
     for (def i = 0; i < fanSpeeds.size(); ++i) {
         if (level > i * interval && level <= (i + 1) * interval) {
@@ -176,7 +208,7 @@ private speedToLevel(speed) {
         return 0
     }
 
-    def speeds = settings.fanSpeeds?.reverse() ?: ["on"]
+    def speeds = getFanSpeeds().reverse()
     def speedIndex = speeds.indexOf(speed)
     def levelInterval = Math.round(100 / speeds.size())
     return (levelInterval * speedIndex) + 1
@@ -232,7 +264,7 @@ private controlFans() {
         }
         def retriggerTime = settings.retriggerTime * 1000
         if (now - lastOffTime > retriggerTime) {
-            def fanSpeeds = settings.fanSpeeds ?: ["on"]
+            def fanSpeeds = getFanSpeeds()
             def tempStep = settings.temperatureStep ?: 3
             for (i = 0; i < fanSpeeds.size(); ++i) {
                 def temp = setPoint + (fanSpeeds.size() - 1 - i) * tempStep
