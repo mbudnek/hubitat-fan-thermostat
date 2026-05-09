@@ -14,6 +14,7 @@
 
 // Changelog:
 // * Feb 17 2020 - Initial Release
+// * May 08 2026 - Move to the new "Automations" menu
 
 import groovy.transform.Field
 
@@ -25,7 +26,8 @@ definition(
     category: "",
     iconUrl: "",
     iconX2Url: "",
-    iconX3Url: ""
+    iconX3Url: "",
+    menu: "Automations",
 )
 
 preferences {
